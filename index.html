@@ -1,0 +1,968 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Woodridge Live Trip App</title>
+  <style>
+    :root {
+      --ink: #141a22;
+      --muted: #5d6875;
+      --paper: #f8f6f0;
+      --white: #fff;
+      --green: #27634a;
+      --blue: #285f91;
+      --gold: #b1771e;
+      --rose: #a6425a;
+      --line: #d9dfd5;
+      --shadow: 0 18px 45px rgba(20, 26, 34, .14);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--ink);
+      background: var(--paper);
+      letter-spacing: 0;
+    }
+
+    .hero {
+      min-height: 88vh;
+      background:
+        linear-gradient(90deg, rgba(20,26,34,.82), rgba(20,26,34,.38), rgba(20,26,34,.18)),
+        url("trip-house.jpeg");
+      background-size: cover;
+      background-position: center;
+      color: var(--white);
+      display: grid;
+      align-items: end;
+      padding: 34px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 6px;
+      background: linear-gradient(90deg, var(--green), var(--gold), var(--blue), var(--rose));
+      animation: glow 3s ease-in-out infinite alternate;
+    }
+
+    .hero-inner {
+      width: min(1120px, 100%);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(320px, .75fr);
+      gap: 34px;
+      align-items: end;
+      padding-bottom: 18px;
+    }
+
+    .eyebrow {
+      color: #f7d784;
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.6px;
+      margin: 0 0 12px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(42px, 8vw, 92px);
+      line-height: .92;
+      letter-spacing: 0;
+    }
+
+    .hero p {
+      max-width: 660px;
+      color: rgba(255,255,255,.86);
+      font-size: 18px;
+      line-height: 1.55;
+      margin: 18px 0 0;
+    }
+
+    .quote {
+      font-size: clamp(22px, 3.4vw, 38px);
+      line-height: 1.25;
+      font-weight: 800;
+      max-width: 760px;
+      margin: 14px 0 0;
+      color: rgba(255,255,255,.94);
+    }
+
+    .quote-small {
+      margin-top: 18px;
+      font-size: 18px;
+      color: #f7d784;
+      font-weight: 800;
+    }
+
+    .live-panel {
+      background: rgba(255,255,255,.92);
+      color: var(--ink);
+      border: 1px solid rgba(255,255,255,.45);
+      border-radius: 8px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      justify-self: end;
+      width: min(100%, 430px);
+      margin-bottom: 4px;
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      color: var(--green);
+      font-size: 18px;
+    }
+
+    .pulse {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 0 0 rgba(39,99,74,.45);
+      animation: pulse 1.8s infinite;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .stat {
+      background: #f2f6f1;
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    .stat b {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+
+    .stat span {
+      font-size: 22px;
+      font-weight: 900;
+    }
+
+    .page {
+      width: min(1120px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 28px 0 48px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      padding: 12px 0;
+      background: rgba(248,246,240,.94);
+      backdrop-filter: blur(8px);
+    }
+
+    .tab {
+      border: 0;
+      border-radius: 999px;
+      padding: 11px 14px;
+      color: var(--ink);
+      background: #fff;
+      border: 1px solid var(--line);
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .tab.active {
+      background: var(--green);
+      color: #fff;
+      border-color: var(--green);
+    }
+
+    section.view { display: none; }
+    section.view.active { display: block; animation: rise .35s ease-out both; }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 24px 0 16px;
+    }
+
+    .section-title h2 {
+      margin: 0;
+      font-size: 28px;
+    }
+
+    .section-title .bar {
+      height: 3px;
+      flex: 1;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--green), rgba(177,119,30,.22));
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .search-panel {
+      background: #fff;
+      border: 1px solid rgba(20,26,34,.08);
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 10px 26px rgba(20,26,34,.08);
+      margin-bottom: 16px;
+    }
+
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .filter-button {
+      border-radius: 999px;
+      padding: 9px 12px;
+      background: #fff;
+      color: var(--ink);
+      border: 1px solid var(--line);
+      min-height: auto;
+      font-size: 13px;
+    }
+
+    .filter-button.active {
+      background: var(--green);
+      color: #fff;
+      border-color: var(--green);
+    }
+
+    .live-results {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .card {
+      background: var(--white);
+      border: 1px solid rgba(20,26,34,.08);
+      border-radius: 8px;
+      padding: 18px;
+      box-shadow: 0 10px 26px rgba(20,26,34,.08);
+    }
+
+    .card h3 {
+      margin: 0 0 8px;
+      font-size: 21px;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .chip, .link-chip {
+      border-radius: 999px;
+      padding: 7px 10px;
+      background: #f2eee6;
+      color: #70450a;
+      font-weight: 800;
+      font-size: 13px;
+      text-decoration: none;
+    }
+
+    .link-chip {
+      background: #eaf3f7;
+      color: var(--blue);
+    }
+
+    .timeline {
+      position: relative;
+      padding-left: 22px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .timeline::before,
+    .timeline::after {
+      content: "";
+      position: absolute;
+      left: 8px;
+      top: 6px;
+      bottom: 6px;
+      width: 3px;
+      border-radius: 99px;
+    }
+
+    .timeline::before { background: var(--line); }
+    .timeline::after {
+      background: linear-gradient(var(--green), var(--gold), var(--blue), var(--rose));
+      animation: draw 1.4s ease-out both;
+    }
+
+    .stop {
+      position: relative;
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 16px;
+      background: var(--white);
+      border-radius: 8px;
+      border: 1px solid rgba(20,26,34,.08);
+      padding: 16px;
+      box-shadow: 0 10px 26px rgba(20,26,34,.08);
+    }
+
+    .stop::before {
+      content: "";
+      position: absolute;
+      left: -21px;
+      top: 23px;
+      width: 15px;
+      height: 15px;
+      border: 4px solid var(--green);
+      border-radius: 50%;
+      background: #fff;
+      z-index: 2;
+    }
+
+    .time {
+      background: #eef4ef;
+      color: var(--green);
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      font-weight: 900;
+      min-height: 88px;
+      padding: 12px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 900;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    input, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 15px;
+      background: #fff;
+      color: var(--ink);
+    }
+
+    button, .button {
+      border: 0;
+      border-radius: 8px;
+      padding: 12px 14px;
+      background: var(--green);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 900;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+    }
+
+    button.secondary {
+      background: #eef4ef;
+      color: var(--green);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr) auto;
+      gap: 12px;
+      align-items: end;
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .photo-card {
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 10px 26px rgba(20,26,34,.08);
+      border: 1px solid rgba(20,26,34,.08);
+    }
+
+    .photo-card img {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      display: block;
+      background: #eef4ef;
+    }
+
+    .photo-card div { padding: 12px; }
+    .photo-card b { display: block; margin-bottom: 8px; }
+
+    .photo-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .danger {
+      background: #f7e9e9;
+      color: #9b273d;
+    }
+
+    .totals {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin: 16px 0;
+    }
+
+    .total {
+      background: #17212b;
+      color: #fff;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .total b {
+      display: block;
+      color: rgba(255,255,255,.68);
+      font-size: 12px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .total span {
+      font-size: 26px;
+      font-weight: 900;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #eef4ef;
+      color: var(--green);
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    .notice {
+      border-left: 4px solid var(--gold);
+      background: #fff8e8;
+      color: #5f4314;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 16px;
+      line-height: 1.5;
+      margin: 14px 0;
+    }
+
+    .hidden { display: none !important; }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes draw {
+      from { transform: scaleY(0); transform-origin: top; }
+      to { transform: scaleY(1); transform-origin: top; }
+    }
+
+    @keyframes pulse {
+      70% { box-shadow: 0 0 0 12px rgba(39,99,74,0); }
+      100% { box-shadow: 0 0 0 0 rgba(39,99,74,0); }
+    }
+
+    @keyframes glow {
+      from { filter: saturate(.8); }
+      to { filter: saturate(1.4); }
+    }
+
+    @media (max-width: 860px) {
+      .hero { min-height: 760px; padding: 22px; align-items: end; }
+      .hero-inner, .grid, .form-grid, .gallery, .totals, .stats, .live-results { grid-template-columns: 1fr; }
+      .live-panel { justify-self: stretch; width: 100%; }
+      .stop { grid-template-columns: 1fr; }
+      .time { min-height: auto; justify-items: start; text-align: left; }
+      table { display: block; overflow-x: auto; white-space: nowrap; }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <div>
+        <p class="eyebrow">321 Villanova to Woodridge, NY</p>
+        <h1>New York Trip</h1>
+        <div class="quote">I really missed this one, but I hope you guys enjoy every moment of the trip. Have lots of fun, take crazy pictures, laugh a lot, and make beautiful memories together.</div>
+        <div class="quote-small">See you all soon guys ❤️ Already missing you all!</div>
+      </div>
+      <aside class="live-panel">
+        <div class="status"><span class="pulse"></span><span id="apiStatus">Dashboard for all photos and expenses</span></div>
+        <div class="stats">
+          <div class="stat"><b>Photos</b><span id="heroPhotos">0</span></div>
+          <div class="stat"><b>Expenses</b><span id="heroExpenses">0</span></div>
+          <div class="stat"><b>Total</b><span id="heroTotal">$0</span></div>
+        </div>
+      </aside>
+    </div>
+  </header>
+
+  <main class="page">
+    <nav class="tabs" aria-label="App sections">
+      <button class="tab active" data-view="plan">Plan</button>
+      <button class="tab" data-view="photos">Photos</button>
+      <button class="tab" data-view="expenses">Expenses</button>
+      <button class="tab" data-view="places">Places</button>
+    </nav>
+
+    <section class="view active" id="plan">
+      <div class="section-title"><h2>Sunday Timeline</h2><div class="bar"></div></div>
+      <div class="timeline">
+        <article class="stop"><div class="time">9:00-10:00 AM</div><div><h3>Breakfast and Get Ready</h3><p>Flexible breakfast block after the late-night arrival.</p><div class="chips"><span class="chip">Airbnb</span><span class="chip">No fixed restaurant</span></div></div></article>
+        <article class="stop"><div class="time">10:00-11:15 AM</div><div><h3>Drive to Minnewaska</h3><p>Airbnb to Hamilton Point and Castle Point Loop area: about 42-48 miles, 60-75 min.</p><div class="chips"><span class="chip">Scenic drive</span><span class="chip">Use Waze/Maps</span></div></div></article>
+        <article class="stop"><div class="time">11:15 AM-2:45 PM</div><div><h3>Hamilton Point and Castle Point Loop</h3><p>Moderate scenic hike with overlooks and Lake Minnewaska views.</p><div class="chips"><span class="chip">Trail</span><span class="chip">Fee: park parking/entry</span><a class="link-chip" href="https://www.alltrails.com/trail/us/new-york/hamilton-point-and-castle-point-loop" target="_blank" rel="noopener">Trail info</a></div></div></article>
+        <article class="stop"><div class="time">3:30-5:00 PM</div><div><h3>Wine Tasting</h3><p>Hudson Valley wine stop near Marlboro. Choose Quartz Rock, Benmarl, or Stoutridge based on availability.</p><div class="chips"><span class="chip">21+ only</span><span class="chip">$20-$25 typical tasting</span><a class="link-chip" href="https://quartzrockvineyard.com/visit" target="_blank" rel="noopener">Quartz Rock</a></div></div></article>
+        <article class="stop"><div class="time">5:40-6:30 PM</div><div><h3>Beacon Ferry Terminal</h3><p>Riverfront/photo stop. Ferry ride only if service is running that day.</p><div class="chips"><span class="chip">Free to visit</span><a class="link-chip" href="https://www.mta.info/agency/metro-north-railroad/connecting-services/newburgh-beacon" target="_blank" rel="noopener">Ferry info</a></div></div></article>
+        <article class="stop"><div class="time">6:30-8:00 PM</div><div><h3>Dinner Break</h3><p>Flexible dinner near Beacon/Newburgh or a Middletown Indian restaurant detour.</p><div class="chips"><span class="chip">Flexible</span><span class="chip">Group decision</span></div></div></article>
+        <article class="stop"><div class="time">8:00-10:00 PM</div><div><h3>Return, Pack, Leave</h3><p>Beacon area to Airbnb: about 58-65 miles. Leave Airbnb for Glassboro around 10:00 PM.</p><div class="chips"><span class="chip">Long drive back</span><span class="chip">Arrive 1:15-2:00 AM Monday</span></div></div></article>
+      </div>
+    </section>
+
+    <section class="view" id="photos">
+      <div class="section-title"><h2>Shared Photos</h2><div class="bar"></div></div>
+      <div class="card">
+        <div class="form-grid">
+          <div>
+            <label for="photoPlace">Place</label>
+            <select id="photoPlace">
+              <option>Hamilton Point and Castle Point Loop</option>
+              <option>Wine Tasting</option>
+              <option>Beacon Ferry Terminal</option>
+              <option>Dhanis Curry Melt</option>
+              <option>Airbnb / Group</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div style="grid-column: span 2;">
+            <label for="photoFile">Photo</label>
+            <input id="photoFile" type="file" accept="image/*">
+          </div>
+          <div>
+            <label>&nbsp;</label>
+            <button id="uploadPhoto">Upload Photo</button>
+          </div>
+          <button class="secondary" id="refreshPhotos">Refresh</button>
+        </div>
+        <p class="notice" id="photoNotice">Photos uploaded here will be visible to everyone after AWS backend connection is active. Please avoid ProRAW and very large files.</p>
+      </div>
+      <div class="gallery" id="gallery"></div>
+    </section>
+
+    <section class="view" id="expenses">
+      <div class="section-title"><h2>Live Expenses</h2><div class="bar"></div></div>
+      <div class="card">
+        <div class="form-grid">
+          <div><label for="people">People</label><input id="people" type="number" min="1" value="15"></div>
+          <div><label for="expensePlace">Place</label><input id="expensePlace" placeholder="Gas, food, tolls"></div>
+          <div><label for="expenseItem">Item</label><input id="expenseItem" placeholder="Lunch, parking"></div>
+          <div><label for="paidBy">Paid By</label><input id="paidBy" placeholder="Name"></div>
+          <div><label for="amount">Amount</label><input id="amount" type="number" min="0" step="0.01" placeholder="0.00"></div>
+        </div>
+        <div class="form-grid" style="grid-template-columns: 1fr auto; margin-top: 12px;">
+          <div><label for="notes">Notes</label><input id="notes" placeholder="Optional note"></div>
+          <button id="addExpense">Add Expense</button>
+        </div>
+      </div>
+      <div class="totals">
+        <div class="total"><b>Total spending</b><span id="total">$0.00</span></div>
+        <div class="total"><b>Each person</b><span id="perPerson">$0.00</span></div>
+        <div class="total"><b>Entries</b><span id="entryCount">0</span></div>
+      </div>
+      <table>
+        <thead><tr><th>Place</th><th>Item</th><th>Paid By</th><th>Amount</th><th>Notes</th><th>Remove</th></tr></thead>
+        <tbody id="expenseRows"><tr><td colspan="6">No expenses yet.</td></tr></tbody>
+      </table>
+    </section>
+
+    <section class="view" id="places">
+      <div class="section-title"><h2>Search Places</h2><div class="bar"></div></div>
+      <div class="search-panel">
+        <label for="placeSearch">Search saved trip places</label>
+        <input id="placeSearch" type="search" placeholder="Filter saved places: hiking, ferry, Indian food, Beacon, waterpark...">
+        <div class="filter-row" aria-label="Place filters">
+          <button class="filter-button active" data-place-filter="all">All</button>
+          <button class="filter-button" data-place-filter="fixed">Fixed</button>
+          <button class="filter-button" data-place-filter="hiking">Hiking</button>
+          <button class="filter-button" data-place-filter="food">Food</button>
+          <button class="filter-button" data-place-filter="ferry">Ferry</button>
+          <button class="filter-button" data-place-filter="extra">Extra</button>
+        </div>
+      </div>
+
+      <div class="section-title"><h2>Find Nearby Places</h2><div class="bar"></div></div>
+      <div class="search-panel">
+        <div class="form-grid" style="grid-template-columns: 1.4fr 1fr auto auto;">
+          <div>
+            <label for="nearbyQuery">Google-style search</label>
+            <input id="nearbyQuery" type="search" value="Indian restaurants near me" placeholder="Indian restaurants near me, coffee near Beacon, gas stations...">
+          </div>
+          <div>
+            <label for="nearbyBase">Search around</label>
+            <select id="nearbyBase">
+              <option value="current">My current location</option>
+              <option value="airbnb">Airbnb / Woodridge</option>
+              <option value="beacon">Beacon Ferry Terminal</option>
+              <option value="minnewaska">Minnewaska</option>
+              <option value="middletown">Middletown</option>
+            </select>
+          </div>
+          <button id="nearbySearch">Search</button>
+          <button class="secondary" id="useCurrentLocation">Use My Location</button>
+        </div>
+        <p class="notice" id="nearbyNotice">Search live places with ratings once Google Places API is enabled in the AWS backend.</p>
+        <div class="live-results" id="nearbyResults"></div>
+      </div>
+
+      <div class="section-title"><h2>Fixed Places</h2><div class="bar"></div></div>
+      <div class="grid">
+        <article class="card place-card" data-type="fixed hiking" data-search="hamilton point castle point loop minnewaska hiking trail lake views 5281 route 44 55 kerhonkson"><h3>Hamilton Point and Castle Point Loop</h3><p>Scenic hiking loop inside Minnewaska State Park Preserve with overlooks, carriage-road sections, and Lake Minnewaska views.</p><div class="chips"><span class="chip">Address: Minnewaska State Park Preserve, Kerhonkson, NY</span><span class="chip">Distance: 42-48 mi from Airbnb</span><span class="chip">Trail</span><span class="chip">Rating: 4.8 AllTrails</span><span class="chip">Fee: park parking/entry</span><a class="link-chip" href="https://www.alltrails.com/trail/us/new-york/hamilton-point-and-castle-point-loop" target="_blank" rel="noopener">Trail info</a><a class="link-chip" href="https://www.google.com/maps/search/?api=1&query=Hamilton%20Point%20and%20Castle%20Point%20Loop%20Minnewaska" target="_blank" rel="noopener">Open in Google Maps</a></div></article>
+        <article class="card place-card" data-type="fixed extra" data-search="wine tasting quartz rock benmarl stoutridge marlboro vineyard winery"><h3>Wine Tasting</h3><p>Hudson Valley wine stop near Marlboro. Best choices are Quartz Rock, Benmarl, or Stoutridge depending on availability.</p><div class="chips"><span class="chip">Address: Marlboro, NY wine area</span><span class="chip">Distance: 20-25 mi from Minnewaska</span><span class="chip">21+ only</span><span class="chip">$20-$25 typical tasting</span><a class="link-chip" href="https://quartzrockvineyard.com/visit" target="_blank" rel="noopener">Quartz Rock</a><a class="link-chip" href="https://www.google.com/maps/search/?api=1&query=Quartz%20Rock%20Vineyard%20Marlboro%20NY" target="_blank" rel="noopener">Open in Google Maps</a></div></article>
+        <article class="card place-card" data-type="fixed ferry" data-search="beacon ferry ride newburgh beacon ferry ny waterway mta hudson river"><h3>Beacon Ferry Ride</h3><p>Plan as a ferry attempt and Hudson River photo stop. Service may be limited on Sunday, so check before depending on the ride.</p><div class="chips"><span class="chip">Address: Beacon waterfront / ferry area</span><span class="chip">Distance: 18-24 mi from Marlboro</span><span class="chip">$1.75 if running</span><span class="chip">Check same day</span><a class="link-chip" href="https://www.mta.info/agency/metro-north-railroad/connecting-services/newburgh-beacon" target="_blank" rel="noopener">MTA ferry info</a><a class="link-chip" href="https://www.google.com/maps/search/?api=1&query=Beacon%20Ferry%20Terminal%20NY%20Waterway" target="_blank" rel="noopener">Open in Google Maps</a></div></article>
+        <article class="card place-card" data-type="fixed ferry" data-search="ny waterway ferry terminal beacon station hudson river waterfront"><h3>NY Waterway Ferry Terminal Beacon</h3><p>Beacon terminal / station area near the Hudson River. Good for sunset photos and a short walk even if ferry service is not running.</p><div class="chips"><span class="chip">Address: Beacon Station / Ferry Plaza, Beacon, NY</span><span class="chip">Distance: 58-65 mi back to Airbnb</span><span class="chip">Free to visit</span><a class="link-chip" href="https://gtfs.nywaterway.com/BeaconTerminal.aspx" target="_blank" rel="noopener">Terminal info</a><a class="link-chip" href="https://www.google.com/maps/search/?api=1&query=NY%20Waterway%20Beacon%20Ferry%20Terminal" target="_blank" rel="noopener">Open in Google Maps</a></div></article>
+      </div>
+
+      <div class="section-title"><h2>Drive Overview</h2><div class="bar"></div></div>
+      <div class="grid">
+        <article class="card"><h3>Glassboro to Airbnb</h3><p>321 Villanova Rd, Glassboro to 170 Silver Lake Rd, Woodridge.</p><div class="chips"><span class="chip">175-190 miles</span><span class="chip">3 hr 15 min-4 hr</span></div></article>
+        <article class="card"><h3>Airbnb to Minnewaska</h3><p>Woodridge Airbnb to Hamilton Point and Castle Point Loop area.</p><div class="chips"><span class="chip">42-48 miles</span><span class="chip">60-75 min</span></div></article>
+        <article class="card"><h3>Minnewaska to Wine Tasting</h3><p>Trail area to Marlboro wine country.</p><div class="chips"><span class="chip">20-25 miles</span><span class="chip">30-40 min</span></div></article>
+        <article class="card"><h3>Beacon to Airbnb</h3><p>Beacon waterfront / ferry terminal back to Woodridge Airbnb.</p><div class="chips"><span class="chip">58-65 miles</span><span class="chip">1 hr 15 min-1 hr 30 min</span></div></article>
+      </div>
+
+      <div class="section-title"><h2>Food Options</h2><div class="bar"></div></div>
+      <div class="grid">
+        <article class="card place-card" data-type="food" data-search="dhanis curry melt indian liberty ny food restaurant"><h3>Dhanis Curry Melt</h3><p>Closest Indian-style option near Woodridge.</p><div class="chips"><span class="chip">Address: 109 S Main St, Liberty, NY</span><span class="chip">Distance: 13-16 mi from Airbnb</span><a class="link-chip" href="http://dhaniscurrymelt.com/" target="_blank" rel="noopener">Website</a><a class="link-chip" href="https://www.google.com/maps/search/?api=1&query=Dhanis%20Curry%20Melt%20109%20S%20Main%20St%20Liberty%20NY" target="_blank" rel="noopener">Open in Google Maps</a></div></article>
+        <article class="card place-card" data-type="food" data-search="dosa grill middletown indian dosa biryani restaurant"><h3>Dosa Grill Middletown</h3><p>Good Indian option for a dinner detour.</p><div class="chips"><span class="chip">Address: 265 NY-211, Middletown, NY</span><span class="chip">Distance: 45-55 min from Airbnb</span><a class="link-chip" href="https://dosagrillmiddletown.com/" target="_blank" rel="noopener">Website</a><a class="link-chip" href="https://www.google.com/maps/search/?api=1&query=Dosa%20Grill%20Middletown%20NY" target="_blank" rel="noopener">Open in Google Maps</a></div></article>
+        <article class="card place-card" data-type="food" data-search="namaste indian restaurant middletown punjabi north indian food"><h3>Namaste Indian Restaurant</h3><p>North Indian/Punjabi-style option in Middletown.</p><div class="chips"><span class="chip">Address: 610 NY-211, Middletown, NY</span><span class="chip">Dinner detour</span><a class="link-chip" href="https://www.namasteindiamiddletown.com/" target="_blank" rel="noopener">Website</a><a class="link-chip" href="https://www.google.com/maps/search/?api=1&query=Namaste%20Indian%20Restaurant%20Middletown%20NY" target="_blank" rel="noopener">Open in Google Maps</a></div></article>
+        <article class="card place-card" data-type="food" data-search="saffron fine indian cuisine middletown curries tandoori"><h3>Saffron Fine Indian Cuisine</h3><p>Indian curries and tandoori-style dishes in Middletown.</p><div class="chips"><span class="chip">Address: 130 Dolson Ave, Middletown, NY</span><span class="chip">Dinner detour</span><a class="link-chip" href="https://www.saffronmiddletown.com/" target="_blank" rel="noopener">Website</a><a class="link-chip" href="https://www.google.com/maps/search/?api=1&query=Saffron%20Fine%20Indian%20Cuisine%20Middletown%20NY" target="_blank" rel="noopener">Open in Google Maps</a></div></article>
+      </div>
+
+      <div class="section-title"><h2>Extra Places Nearby</h2><div class="bar"></div></div>
+      <div class="grid">
+        <article class="card place-card" data-type="extra" data-search="dia beacon museum modern art beacon"><h3>Dia Beacon</h3><p>Large modern art museum near the ferry terminal.</p><div class="chips"><span class="chip">Address: 3 Beekman St, Beacon, NY</span><span class="chip">Museum</span><a class="link-chip" href="https://www.diaart.org/visit/visit-our-locations-sites/dia-beacon-beacon-united-states" target="_blank" rel="noopener">Website</a><a class="link-chip" href="https://www.google.com/maps/search/?api=1&query=Dia%20Beacon%203%20Beekman%20St%20Beacon%20NY" target="_blank" rel="noopener">Open in Google Maps</a></div></article>
+        <article class="card place-card" data-type="extra hiking" data-search="walkway over the hudson bridge poughkeepsie scenic walk"><h3>Walkway Over the Hudson</h3><p>Famous scenic pedestrian bridge if the group has extra time.</p><div class="chips"><span class="chip">Address: Poughkeepsie, NY</span><span class="chip">Free walkway</span><a class="link-chip" href="https://walkway.org/" target="_blank" rel="noopener">Website</a><a class="link-chip" href="https://www.google.com/maps/search/?api=1&query=Walkway%20Over%20the%20Hudson" target="_blank" rel="noopener">Open in Google Maps</a></div></article>
+        <article class="card place-card" data-type="extra" data-search="resorts world catskills casino monticello indoor"><h3>Resorts World Catskills</h3><p>Casino/resort near Monticello, useful as an indoor backup if weather changes.</p><div class="chips"><span class="chip">Address: 888 Resorts World Dr, Monticello, NY</span><span class="chip">Free entry</span><a class="link-chip" href="https://rwcatskills.com/" target="_blank" rel="noopener">Website</a><a class="link-chip" href="https://www.google.com/maps/search/?api=1&query=Resorts%20World%20Catskills%20888%20Resorts%20World%20Dr%20Monticello%20NY" target="_blank" rel="noopener">Open in Google Maps</a></div></article>
+        <article class="card place-card" data-type="extra" data-search="kartrite indoor waterpark monticello resort"><h3>The Kartrite Indoor Waterpark</h3><p>Large indoor waterpark near Resorts World. Best backup if the group skips hiking.</p><div class="chips"><span class="chip">Address: 555 Resorts World Dr, Monticello, NY</span><span class="chip">Paid day pass</span><a class="link-chip" href="https://www.thekartrite.com/" target="_blank" rel="noopener">Website</a><a class="link-chip" href="https://www.google.com/maps/search/?api=1&query=The%20Kartrite%20555%20Resorts%20World%20Dr%20Monticello%20NY" target="_blank" rel="noopener">Open in Google Maps</a></div></article>
+        <article class="card place-card" data-type="extra" data-search="bethel woods center arts woodstock museum historic site"><h3>Bethel Woods Center for the Arts</h3><p>Historic 1969 Woodstock festival site with museum and concert venue.</p><div class="chips"><span class="chip">Address: 200 Hurd Rd, Bethel, NY</span><span class="chip">$20-$23 museum</span><a class="link-chip" href="https://www.bethelwoodscenter.org/the-museum/plan-your-museum-visit" target="_blank" rel="noopener">Website</a><a class="link-chip" href="https://www.google.com/maps/search/?api=1&query=Bethel%20Woods%20Center%20for%20the%20Arts" target="_blank" rel="noopener">Open in Google Maps</a></div></article>
+        <article class="card place-card" data-type="extra hiking" data-search="neversink river unique area gorge waterfall nature trail"><h3>Neversink River Unique Area</h3><p>Nature area with gorge trails, river scenery, and waterfall-style hiking options.</p><div class="chips"><span class="chip">Address: Rock Hill / Forestburgh, NY area</span><span class="chip">Free</span><a class="link-chip" href="https://dec.ny.gov/places/neversink-river-unique-area" target="_blank" rel="noopener">Info</a><a class="link-chip" href="https://www.google.com/maps/search/?api=1&query=Neversink%20River%20Unique%20Area%20NY" target="_blank" rel="noopener">Open in Google Maps</a></div></article>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const API_BASE = "https://ue0nf5j423.execute-api.us-east-1.amazonaws.com";
+    const connected = API_BASE && !API_BASE.includes("PASTE_API_URL_HERE");
+    const money = value => "$" + Number(value || 0).toFixed(2);
+    const qs = id => document.getElementById(id);
+    let expenses = [];
+
+    document.querySelectorAll(".tab").forEach(button => {
+      button.addEventListener("click", () => {
+        document.querySelectorAll(".tab").forEach(item => item.classList.remove("active"));
+        document.querySelectorAll(".view").forEach(item => item.classList.remove("active"));
+        button.classList.add("active");
+        qs(button.dataset.view).classList.add("active");
+      });
+    });
+
+    async function api(path, options = {}) {
+      if (!connected) throw new Error("AWS API is not connected yet.");
+      const res = await fetch(API_BASE + path, {
+        ...options,
+        headers: { "content-type": "application/json", ...(options.headers || {}) }
+      });
+      if (!res.ok) throw new Error((await res.json()).error || "Request failed");
+      return res.json();
+    }
+
+    function setStatus(message, ok = true) {
+      qs("apiStatus").textContent = "Dashboard for all photos and expenses";
+      qs("apiStatus").style.color = ok ? "var(--green)" : "var(--rose)";
+    }
+
+    async function loadPhotos() {
+      const gallery = qs("gallery");
+      if (!connected) {
+        gallery.innerHTML = '<article class="card"><h3>AWS not connected yet</h3><p>Deploy the backend, send me the API URL, and I will plug it into this app. Then everyone can upload and see shared photos.</p></article>';
+        return;
+      }
+      const data = await api("/photos");
+      qs("heroPhotos").textContent = data.photos.length;
+      gallery.innerHTML = data.photos.length ? data.photos.map(photo => `
+        <article class="photo-card">
+          <img src="${photo.url}" alt="${photo.place}">
+          <div>
+            <b>${photo.place}</b>
+            <div class="photo-actions">
+              <a class="link-chip" href="${photo.url}" download>Download</a>
+              <button class="danger" data-delete-photo="${photo.id}">Delete</button>
+            </div>
+          </div>
+        </article>`).join("") : '<article class="card"><h3>No photos yet</h3><p>Be the first one to upload a trip photo.</p></article>';
+    }
+
+    async function uploadPhoto() {
+      const file = qs("photoFile").files[0];
+      if (!file) return qs("photoNotice").textContent = "Choose a photo first.";
+      if (file.size > 20 * 1024 * 1024) return qs("photoNotice").textContent = "Please upload photos under 20 MB.";
+      qs("photoNotice").textContent = "Preparing upload...";
+      const data = await api("/photos/upload-url", {
+        method: "POST",
+        body: JSON.stringify({ fileName: file.name, contentType: file.type || "image/jpeg", place: qs("photoPlace").value })
+      });
+      const form = new FormData();
+      Object.entries(data.upload.fields).forEach(([key, value]) => form.append(key, value));
+      form.append("file", file);
+      const uploadRes = await fetch(data.upload.url, { method: "POST", body: form });
+      if (!uploadRes.ok) throw new Error("Upload failed");
+      await api("/photos/complete", { method: "POST", body: JSON.stringify({ photoId: data.photoId }) });
+      qs("photoFile").value = "";
+      qs("photoNotice").textContent = "Photo uploaded. Everyone can refresh and see it.";
+      await loadPhotos();
+    }
+
+    async function loadExpenses() {
+      if (!connected) {
+        setStatus("Backend not connected yet", false);
+        return;
+      }
+      const data = await api("/expenses");
+      expenses = data.expenses || [];
+      const people = Math.max(1, Number(qs("people").value || 1));
+      qs("total").textContent = money(data.total);
+      qs("perPerson").textContent = money(data.total / people);
+      qs("entryCount").textContent = expenses.length;
+      qs("heroExpenses").textContent = expenses.length;
+      qs("heroTotal").textContent = money(data.total);
+      qs("expenseRows").innerHTML = expenses.length ? expenses.map(expense => `
+        <tr>
+          <td>${expense.place || "-"}</td>
+          <td>${expense.item || "-"}</td>
+          <td>${expense.paidBy || "-"}</td>
+          <td>${money(expense.amount)}</td>
+          <td>${expense.notes || "-"}</td>
+          <td><button class="secondary" data-delete-expense="${expense.id}">Delete</button></td>
+        </tr>`).join("") : '<tr><td colspan="6">No expenses yet.</td></tr>';
+    }
+
+    async function addExpense() {
+      await api("/expenses", {
+        method: "POST",
+        body: JSON.stringify({
+          place: qs("expensePlace").value,
+          item: qs("expenseItem").value,
+          paidBy: qs("paidBy").value,
+          amount: qs("amount").value,
+          notes: qs("notes").value
+        })
+      });
+      ["expensePlace", "expenseItem", "paidBy", "amount", "notes"].forEach(id => qs(id).value = "");
+      await loadExpenses();
+    }
+
+    qs("uploadPhoto").addEventListener("click", () => uploadPhoto().catch(err => qs("photoNotice").textContent = err.message));
+    qs("refreshPhotos").addEventListener("click", () => loadPhotos().catch(err => qs("photoNotice").textContent = err.message));
+    qs("addExpense").addEventListener("click", () => addExpense().catch(err => alert(err.message)));
+    qs("people").addEventListener("input", loadExpenses);
+    qs("expenseRows").addEventListener("click", async event => {
+      const id = event.target.dataset.deleteExpense;
+      if (!id) return;
+      await api("/expenses/" + id, { method: "DELETE" });
+      await loadExpenses();
+    });
+
+    qs("gallery").addEventListener("click", async event => {
+      const id = event.target.dataset.deletePhoto;
+      if (!id) return;
+      const code = prompt("Enter admin code to delete this photo:");
+      if (code !== "321trip") {
+        alert("Wrong admin code.");
+        return;
+      }
+      await api("/photos/" + id, { method: "DELETE" });
+      await loadPhotos();
+    });
+
+    let activePlaceFilter = "all";
+    let currentCoords = null;
+    const baseCoords = {
+      airbnb: { lat: 41.7048, lng: -74.5846 },
+      beacon: { lat: 41.5057, lng: -73.9859 },
+      minnewaska: { lat: 41.7357, lng: -74.2399 },
+      middletown: { lat: 41.4459, lng: -74.4229 }
+    };
+
+    function filterPlaces() {
+      const search = (qs("placeSearch")?.value || "").trim().toLowerCase();
+      document.querySelectorAll(".place-card").forEach(card => {
+        const haystack = `${card.innerText} ${card.dataset.search || ""}`.toLowerCase();
+        const type = card.dataset.type || "";
+        const matchesSearch = !search || haystack.includes(search);
+        const matchesType = activePlaceFilter === "all" || type.includes(activePlaceFilter);
+        card.classList.toggle("hidden", !(matchesSearch && matchesType));
+      });
+    }
+
+    qs("placeSearch")?.addEventListener("input", filterPlaces);
+    document.querySelectorAll("[data-place-filter]").forEach(button => {
+      button.addEventListener("click", () => {
+        document.querySelectorAll("[data-place-filter]").forEach(item => item.classList.remove("active"));
+        button.classList.add("active");
+        activePlaceFilter = button.dataset.placeFilter;
+        filterPlaces();
+      });
+    });
+
+    function getSearchCoords() {
+      const base = qs("nearbyBase").value;
+      if (base === "current") return currentCoords;
+      return baseCoords[base];
+    }
+
+    function renderNearbyPlaces(places) {
+      const box = qs("nearbyResults");
+      if (!places.length) {
+        box.innerHTML = '<article class="card"><h3>No places found</h3><p>Try a different search, like "Indian restaurants near Beacon" or "coffee near me".</p></article>';
+        return;
+      }
+      box.innerHTML = places.map(place => `
+        <article class="card">
+          <h3>${place.name}</h3>
+          <p>${place.address || "Address not available"}</p>
+          <div class="chips">
+            <span class="chip">${place.type || "Place"}</span>
+            <span class="chip">Rating: ${place.rating ? place.rating + " / 5" : "Not listed"}</span>
+            <span class="chip">${place.ratingCount ? place.ratingCount + " reviews" : "Reviews not listed"}</span>
+            <a class="link-chip" href="${place.mapsUrl || "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(place.name)}" target="_blank" rel="noopener">Open in Google Maps</a>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    async function searchNearbyPlaces() {
+      const query = qs("nearbyQuery").value.trim();
+      if (!query) return;
+      const coords = getSearchCoords();
+      if (qs("nearbyBase").value === "current" && !coords) {
+        qs("nearbyNotice").textContent = "Click Use My Location first, or choose Airbnb / Beacon / Minnewaska / Middletown.";
+        return;
+      }
+      qs("nearbyNotice").textContent = "Searching nearby places...";
+      try {
+        const data = await api("/places/search", {
+          method: "POST",
+          body: JSON.stringify({
+            query,
+            lat: coords?.lat,
+            lng: coords?.lng,
+            radius: 16000
+          })
+        });
+        qs("nearbyNotice").textContent = `Showing ${data.places.length} nearby result(s) with Google ratings.`;
+        renderNearbyPlaces(data.places);
+      } catch (error) {
+        qs("nearbyNotice").textContent = error.message;
+        qs("nearbyResults").innerHTML = '<article class="card"><h3>Google Places is not ready yet</h3><p>Enable Google Places API, update the CloudFormation stack with your API key, then this search will show live nearby restaurants and ratings.</p></article>';
+      }
+    }
+
+    qs("nearbySearch")?.addEventListener("click", searchNearbyPlaces);
+    qs("nearbyQuery")?.addEventListener("keydown", event => {
+      if (event.key === "Enter") searchNearbyPlaces();
+    });
+    qs("useCurrentLocation")?.addEventListener("click", () => {
+      if (!navigator.geolocation) {
+        qs("nearbyNotice").textContent = "Location is not available in this browser. Choose Airbnb or Beacon instead.";
+        return;
+      }
+      qs("nearbyNotice").textContent = "Getting your location...";
+      navigator.geolocation.getCurrentPosition(
+        position => {
+          currentCoords = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          };
+          qs("nearbyBase").value = "current";
+          qs("nearbyNotice").textContent = "Location added. Now search Indian restaurants near me, coffee, gas, or anything else.";
+        },
+        () => {
+          qs("nearbyNotice").textContent = "Location permission was blocked. Choose Airbnb / Beacon / Minnewaska / Middletown instead.";
+        }
+      );
+    });
+
+    if (connected) {
+      setStatus("Live AWS backend connected");
+      loadPhotos().catch(() => setStatus("Photo API issue", false));
+      loadExpenses().catch(() => setStatus("Expense API issue", false));
+    } else {
+      setStatus("Ready for AWS API connection", false);
+      loadPhotos();
+    }
+  </script>
+</body>
+</html>
